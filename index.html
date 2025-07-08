@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos PI - Moyopampa y Calllahuanca</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <title>Dashboard PI - Moyopampa y Callahuanca</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.24.1/plotly.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,551 +14,476 @@
             min-height: 100vh;
             color: #333;
         }
-
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-
-        .header {
+        
+        h1 {
             text-align: center;
+            color: white;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            margin: 0;
             font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
-        .connection-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .connected {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .disconnected {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .connecting {
-            background: #f39c12;
-            color: white;
-        }
-
-        .stations-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .station-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .station-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .moyopampa .station-title {
-            color: #3498db;
-        }
-
-        .calllahuanca .station-title {
-            color: #e74c3c;
-        }
-
-        .chart-container {
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .chart-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-
+        
         .controls {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
-
+        
         .control-group {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 10px;
         }
-
-        .control-group label {
-            font-weight: bold;
-            color: #2c3e50;
-            min-width: 120px;
-        }
-
-        select, button {
-            padding: 8px 15px;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            color: #2c3e50;
-        }
-
+        
         button {
-            background: #3498db;
-            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
+        
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
         button:hover {
-            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
-
-        button:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
+        
+        select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
         }
-
-        .last-update {
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .status {
             text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
+        
+        .status.connected {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .status.disconnected {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .current-values {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .value-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .value-label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .value-number {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
         .loading {
             text-align: center;
-            color: #7f8c8d;
-            font-size: 1.1em;
-            margin: 50px 0;
+            padding: 40px;
+            color: white;
+            font-size: 1.2em;
         }
-
+        
         @media (max-width: 768px) {
-            .stations-container {
+            .charts-container {
                 grid-template-columns: 1fr;
-                gap: 20px;
             }
             
-            .control-group {
+            .controls {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: center;
             }
             
-            .control-group label {
-                min-width: auto;
+            .values-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Monitoreo de Estaciones PI</h1>
-            <p>Moyopampa y Calllahuanca - Datos en Tiempo Real</p>
-            <div id="connectionStatus" class="connection-status connecting">Conectando...</div>
-        </div>
-
+        <h1>🏭 Dashboard PI - Moyopampa y Callahuanca</h1>
+        
         <div class="controls">
             <div class="control-group">
-                <label for="timeRange">Rango de Tiempo:</label>
-                <select id="timeRange">
-                    <option value="1">Última hora</option>
-                    <option value="6">Últimas 6 horas</option>
-                    <option value="12">Últimas 12 horas</option>
-                    <option value="24" selected>Últimas 24 horas</option>
-                    <option value="48">Últimas 48 horas</option>
-                    <option value="168">Última semana</option>
+                <label for="plantSelect" style="color: white; font-weight: bold;">Planta:</label>
+                <select id="plantSelect">
+                    <option value="Moyopampa">Moyopampa</option>
+                    <option value="Callahuanca">Callahuanca</option>
                 </select>
             </div>
-            <div class="control-group">
-                <button id="refreshBtn">Actualizar Datos</button>
-                <button id="autoRefreshBtn">Auto-actualizar: ON</button>
+            
+            <button id="connectBtn" class="primary">🔌 Conectar</button>
+            <button id="refreshBtn" class="secondary">🔄 Actualizar</button>
+        </div>
+        
+        <div id="status" class="status disconnected">
+            ❌ Desconectado del servidor WebSocket
+        </div>
+        
+        <div class="current-values">
+            <h3 style="text-align: center; color: #333;">📊 Valores Actuales</h3>
+            <div id="currentValues" class="values-grid">
+                <div class="loading">Cargando valores actuales...</div>
             </div>
         </div>
-
-        <div class="stations-container">
-            <div class="station-card moyopampa">
-                <div class="station-title">Moyopampa</div>
-                <div class="chart-container">
-                    <div class="chart-title">Nivel de Agua (m)</div>
-                    <div id="moyopampa-nivel" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Caudal (m³/s)</div>
-                    <div id="moyopampa-caudal" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Temperatura (°C)</div>
-                    <div id="moyopampa-temperatura" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Precipitación (mm)</div>
-                    <div id="moyopampa-precipitacion" style="height: 300px;"></div>
-                </div>
+        
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">⚡ Potencias</div>
+                <div id="powerChart"></div>
             </div>
-
-            <div class="station-card calllahuanca">
-                <div class="station-title">Calllahuanca</div>
-                <div class="chart-container">
-                    <div class="chart-title">Nivel de Agua (m)</div>
-                    <div id="calllahuanca-nivel" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Caudal (m³/s)</div>
-                    <div id="calllahuanca-caudal" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Temperatura (°C)</div>
-                    <div id="calllahuanca-temperatura" style="height: 300px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Precipitación (mm)</div>
-                    <div id="calllahuanca-precipitacion" style="height: 300px;"></div>
-                </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">💧 Caudales</div>
+                <div id="flowChart"></div>
             </div>
-        </div>
-
-        <div class="last-update" id="lastUpdate">
-            Última actualización: --
         </div>
     </div>
 
     <script>
-        class PIDataClient {
+        class PIWebSocketClient {
             constructor() {
                 this.ws = null;
+                this.isConnected = false;
+                this.currentPlant = 'Moyopampa';
                 this.reconnectAttempts = 0;
                 this.maxReconnectAttempts = 5;
-                this.reconnectInterval = 3000;
-                this.isAutoRefresh = true;
-                this.autoRefreshInterval = null;
+                this.reconnectDelay = 3000;
                 
-                this.stationData = {
-                    moyopampa: {},
-                    calllahuanca: {}
-                };
-                
-                this.colors = {
-                    moyopampa: '#3498db',
-                    calllahuanca: '#e74c3c'
-                };
-                
-                this.init();
+                this.initializeEventListeners();
+                this.initializePlotly();
             }
             
-            init() {
-                this.setupEventListeners();
-                this.connect();
-                this.startAutoRefresh();
+            initializeEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('refreshBtn').addEventListener('click', () => this.requestData());
+                document.getElementById('plantSelect').addEventListener('change', (e) => {
+                    this.currentPlant = e.target.value;
+                    this.requestData();
+                });
             }
             
-            setupEventListeners() {
-                document.getElementById('refreshBtn').addEventListener('click', () => {
-                    this.requestData();
-                });
+            initializePlotly() {
+                const config = {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+                    displaylogo: false
+                };
                 
-                document.getElementById('autoRefreshBtn').addEventListener('click', () => {
-                    this.toggleAutoRefresh();
-                });
+                const layout = {
+                    height: 400,
+                    showlegend: true,
+                    hovermode: 'x unified',
+                    font: { family: 'Segoe UI, Arial' },
+                    plot_bgcolor: '#f8f9fa',
+                    paper_bgcolor: 'white',
+                    xaxis: {
+                        title: 'Tiempo',
+                        type: 'date',
+                        gridcolor: '#e9ecef'
+                    },
+                    yaxis: {
+                        title: 'Valor',
+                        gridcolor: '#e9ecef'
+                    },
+                    margin: { l: 60, r: 40, t: 40, b: 60 }
+                };
                 
-                document.getElementById('timeRange').addEventListener('change', () => {
-                    this.requestData();
-                });
+                Plotly.newPlot('powerChart', [], layout, config);
+                Plotly.newPlot('flowChart', [], layout, config);
             }
             
             connect() {
+                if (this.isConnected) {
+                    this.disconnect();
+                    return;
+                }
+                
                 try {
                     this.ws = new WebSocket('ws://localhost:8765');
                     
                     this.ws.onopen = () => {
-                        console.log('Conectado al servidor WebSocket');
-                        this.updateConnectionStatus('connected');
+                        this.isConnected = true;
                         this.reconnectAttempts = 0;
+                        this.updateStatus('connected', '✅ Conectado al servidor PI');
+                        document.getElementById('connectBtn').textContent = '🔌 Desconectar';
+                        document.getElementById('connectBtn').className = 'secondary';
+                        
+                        // Solicitar datos iniciales
+                        this.requestData();
+                        this.requestCurrentValues();
                     };
                     
                     this.ws.onmessage = (event) => {
-                        try {
-                            const data = JSON.parse(event.data);
-                            this.handleMessage(data);
-                        } catch (error) {
-                            console.error('Error parseando mensaje:', error);
-                        }
+                        this.handleMessage(JSON.parse(event.data));
                     };
                     
                     this.ws.onclose = () => {
-                        console.log('Conexión WebSocket cerrada');
-                        this.updateConnectionStatus('disconnected');
+                        this.isConnected = false;
+                        this.updateStatus('disconnected', '❌ Desconectado del servidor');
+                        document.getElementById('connectBtn').textContent = '🔌 Conectar';
+                        document.getElementById('connectBtn').className = 'primary';
+                        
+                        // Intentar reconectar
                         this.attemptReconnect();
                     };
                     
                     this.ws.onerror = (error) => {
-                        console.error('Error WebSocket:', error);
-                        this.updateConnectionStatus('disconnected');
+                        console.error('WebSocket error:', error);
+                        this.updateStatus('disconnected', '❌ Error de conexión');
                     };
                     
                 } catch (error) {
-                    console.error('Error conectando:', error);
-                    this.updateConnectionStatus('disconnected');
-                    this.attemptReconnect();
+                    console.error('Error connecting:', error);
+                    this.updateStatus('disconnected', '❌ Error al conectar');
                 }
+            }
+            
+            disconnect() {
+                if (this.ws) {
+                    this.ws.close();
+                    this.ws = null;
+                }
+                this.isConnected = false;
             }
             
             attemptReconnect() {
                 if (this.reconnectAttempts < this.maxReconnectAttempts) {
                     this.reconnectAttempts++;
-                    console.log(`Intentando reconectar... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                    this.updateStatus('disconnected', `🔄 Reintentando conexión (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
                     
                     setTimeout(() => {
                         this.connect();
-                    }, this.reconnectInterval);
+                    }, this.reconnectDelay);
                 } else {
-                    console.error('Máximo número de intentos de reconexión alcanzado');
+                    this.updateStatus('disconnected', '❌ No se pudo reconectar. Intente manualmente.');
                 }
-            }
-            
-            updateConnectionStatus(status) {
-                const statusElement = document.getElementById('connectionStatus');
-                statusElement.className = `connection-status ${status}`;
-                
-                switch (status) {
-                    case 'connected':
-                        statusElement.textContent = 'Conectado';
-                        break;
-                    case 'disconnected':
-                        statusElement.textContent = 'Desconectado';
-                        break;
-                    case 'connecting':
-                        statusElement.textContent = 'Conectando...';
-                        break;
-                }
-            }
-            
-            handleMessage(data) {
-                switch (data.type) {
-                    case 'initial_data':
-                        this.processStationData(data.stations);
-                        break;
-                    case 'data_update':
-                        this.processStationData(data.stations);
-                        break;
-                    case 'station_data':
-                        this.processStationData({ [data.station.station]: data.station });
-                        break;
-                    case 'pong':
-                        console.log('Pong recibido');
-                        break;
-                }
-            }
-            
-            processStationData(stations) {
-                Object.keys(stations).forEach(stationName => {
-                    const stationData = stations[stationName];
-                    this.stationData[stationName] = stationData.data;
-                    this.updateCharts(stationName);
-                });
-                
-                this.updateLastUpdateTime();
-            }
-            
-            updateCharts(stationName) {
-                const data = this.stationData[stationName];
-                if (!data) return;
-                
-                // Mapeo de parámetros
-                const parameters = {
-                    nivel_agua: { name: 'nivel', unit: 'm', color: '#3498db' },
-                    caudal: { name: 'caudal', unit: 'm³/s', color: '#2ecc71' },
-                    temperatura: { name: 'temperatura', unit: '°C', color: '#e74c3c' },
-                    precipitacion: { name: 'precipitacion', unit: 'mm', color: '#9b59b6' }
-                };
-                
-                Object.keys(parameters).forEach(param => {
-                    if (data[param]) {
-                        const paramData = data[param];
-                        const paramConfig = parameters[param];
-                        
-                        this.createTimeSeriesChart(
-                            `${stationName}-${paramConfig.name}`,
-                            paramData,
-                            paramConfig.unit,
-                            paramConfig.color
-                        );
-                    }
-                });
-            }
-            
-            createTimeSeriesChart(elementId, data, unit, color) {
-                const x = data.map(d => new Date(d.timestamp));
-                const y = data.map(d => d.value);
-                
-                const trace = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    name: unit,
-                    line: { color: color, width: 2 },
-                    marker: { color: color, size: 4 },
-                    hovertemplate: '<b>%{y:.2f} ' + unit + '</b><br>' +
-                                  'Tiempo: %{x}<br>' +
-                                  '<extra></extra>'
-                };
-                
-                const layout = {
-                    margin: { l: 50, r: 20, b: 50, t: 20 },
-                    xaxis: {
-                        title: 'Tiempo',
-                        type: 'date',
-                        tickformat: '%H:%M<br>%d/%m',
-                        gridcolor: '#ecf0f1',
-                        linecolor: '#bdc3c7'
-                    },
-                    yaxis: {
-                        title: unit,
-                        gridcolor: '#ecf0f1',
-                        linecolor: '#bdc3c7'
-                    },
-                    plot_bgcolor: '#ffffff',
-                    paper_bgcolor: '#ffffff',
-                    font: { family: 'Segoe UI', size: 12 },
-                    hovermode: 'closest',
-                    showlegend: false
-                };
-                
-                const config = {
-                    responsive: true,
-                    displayModeBar: true,
-                    displaylogo: false,
-                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d', 'autoScale2d']
-                };
-                
-                Plotly.newPlot(elementId, [trace], layout, config);
             }
             
             requestData() {
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                    const hours = parseInt(document.getElementById('timeRange').value);
+                if (this.isConnected && this.ws) {
+                    this.ws.send(JSON.stringify({
+                        action: 'get_data',
+                        plant: this.currentPlant
+                    }));
+                }
+            }
+            
+            requestCurrentValues() {
+                if (this.isConnected && this.ws) {
+                    this.ws.send(JSON.stringify({
+                        action: 'get_current_values'
+                    }));
+                }
+            }
+            
+            handleMessage(message) {
+                switch (message.action) {
+                    case 'data_update':
+                        this.updateCharts(message.data);
+                        break;
+                    case 'current_values':
+                        this.updateCurrentValues(message.data);
+                        break;
+                    default:
+                        console.log('Unknown message type:', message.action);
+                }
+            }
+            
+            updateCharts(data) {
+                if (!data || !data.data) return;
+                
+                const powerTraces = [];
+                const flowTraces = [];
+                
+                // Colores para las trazas
+                const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+                let colorIndex = 0;
+                
+                Object.entries(data.data).forEach(([name, values]) => {
+                    if (!values.timestamps || !values.values) return;
                     
-                    // Solicitar datos para ambas estaciones
-                    ['moyopampa', 'calllahuanca'].forEach(station => {
-                        this.ws.send(JSON.stringify({
-                            type: 'request_data',
-                            station: station,
-                            hours_back: hours
-                        }));
-                    });
-                } else {
-                    console.warn('WebSocket no está conectado');
-                }
-            }
-            
-            toggleAutoRefresh() {
-                this.isAutoRefresh = !this.isAutoRefresh;
-                const btn = document.getElementById('autoRefreshBtn');
-                
-                if (this.isAutoRefresh) {
-                    btn.textContent = 'Auto-actualizar: ON';
-                    btn.style.background = '#2ecc71';
-                    this.startAutoRefresh();
-                } else {
-                    btn.textContent = 'Auto-actualizar: OFF';
-                    btn.style.background = '#e74c3c';
-                    this.stopAutoRefresh();
-                }
-            }
-            
-            startAutoRefresh() {
-                if (this.autoRefreshInterval) {
-                    clearInterval(this.autoRefreshInterval);
-                }
-                
-                this.autoRefreshInterval = setInterval(() => {
-                    if (this.isAutoRefresh) {
-                        this.requestData();
+                    const trace = {
+                        x: values.timestamps,
+                        y: values.values,
+                        name: name,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        line: { 
+                            width: 2, 
+                            color: colors[colorIndex % colors.length]
+                        },
+                        marker: { size: 4 },
+                        hovertemplate: '<b>%{fullData.name}</b><br>' +
+                                     'Tiempo: %{x}<br>' +
+                                     'Valor: %{y:.2f}<br>' +
+                                     '<extra></extra>'
+                    };
+                    
+                    if (name.includes('Potencia')) {
+                        powerTraces.push(trace);
+                    } else if (name.includes('Caudal')) {
+                        flowTraces.push(trace);
                     }
-                }, 60000); // Actualizar cada minuto
-            }
-            
-            stopAutoRefresh() {
-                if (this.autoRefreshInterval) {
-                    clearInterval(this.autoRefreshInterval);
-                    this.autoRefreshInterval = null;
-                }
-            }
-            
-            updateLastUpdateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleString('es-PE', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
+                    
+                    colorIndex++;
                 });
                 
-                document.getElementById('lastUpdate').textContent = `Última actualización: ${timeString}`;
+                // Actualizar gráfico de potencias
+                if (powerTraces.length > 0) {
+                    const powerLayout = {
+                        title: `Potencias - ${data.plant}`,
+                        yaxis: { title: 'Potencia (MW)' },
+                        xaxis: { title: 'Tiempo' }
+                    };
+                    
+                    Plotly.react('powerChart', powerTraces, powerLayout);
+                }
+                
+                // Actualizar gráfico de caudales
+                if (flowTraces.length > 0) {
+                    const flowLayout = {
+                        title: `Caudales - ${data.plant}`,
+                        yaxis: { title: 'Caudal (m³/s)' },
+                        xaxis: { title: 'Tiempo' }
+                    };
+                    
+                    Plotly.react('flowChart', flowTraces, flowLayout);
+                }
             }
             
-            sendPing() {
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify({ type: 'ping' }));
+            updateCurrentValues(data) {
+                const container = document.getElementById('currentValues');
+                container.innerHTML = '';
+                
+                // Filtrar valores según la planta seleccionada
+                const filteredData = {};
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key.toLowerCase().includes(this.currentPlant.toLowerCase())) {
+                        filteredData[key] = value;
+                    }
+                });
+                
+                Object.entries(filteredData).forEach(([name, value]) => {
+                    const valueItem = document.createElement('div');
+                    valueItem.className = 'value-item';
+                    
+                    const formattedValue = value !== null ? 
+                        (typeof value === 'number' ? value.toFixed(2) : value) : 
+                        'N/A';
+                    
+                    const unit = name.includes('Potencia') ? 'MW' : 
+                               name.includes('Caudal') ? 'm³/s' : '';
+                    
+                    valueItem.innerHTML = `
+                        <div class="value-label">${name}</div>
+                        <div class="value-number">${formattedValue} ${unit}</div>
+                    `;
+                    
+                    container.appendChild(valueItem);
+                });
+                
+                if (Object.keys(filteredData).length === 0) {
+                    container.innerHTML = '<div class="loading">No hay datos disponibles para esta planta</div>';
                 }
+            }
+            
+            updateStatus(type, message) {
+                const statusEl = document.getElementById('status');
+                statusEl.className = `status ${type}`;
+                statusEl.textContent = message;
             }
         }
-
-        // Inicializar cliente cuando se carga la página
-        document.addEventListener('DOMContentLoaded', () => {
-            window.piClient = new PIDataClient();
-            
-            // Enviar ping cada 30 segundos para mantener la conexión
-            setInterval(() => {
-                if (window.piClient) {
-                    window.piClient.sendPing();
-                }
-            }, 30000);
-        });
-
-        // Manejar cierre de ventana
-        window.addEventListener('beforeunload', () => {
-            if (window.piClient && window.piClient.ws) {
-                window.piClient.ws.close();
-            }
-        });
-    </script>
-</body>
-</html>
+        
+        // Inicializar cliente WebSocket
+        const client = new PIWebSocketClient();
